@@ -18,15 +18,36 @@ function App() {
       setIsLoading(true);
       setError(null);
       
-      const [tides, asilomar, loversPoint] = await Promise.all([
+      // Load data with individual error handling to prevent one failure from blocking everything
+      const [tides, asilomar, loversPoint] = await Promise.allSettled([
         trpc.getCoyotePointTides.query(),
         trpc.getMarineConditions.query('Asilomar State Beach'),
         trpc.getMarineConditions.query('Lovers Point')
       ]);
 
-      setTideData(tides);
-      setAsilomarConditions(asilomar);
-      setLoversPointConditions(loversPoint);
+      // Handle tide data
+      if (tides.status === 'fulfilled') {
+        setTideData(tides.value);
+      } else {
+        console.error('Failed to load tide data:', tides.reason);
+      }
+
+      // Handle Asilomar conditions
+      if (asilomar.status === 'fulfilled') {
+        setAsilomarConditions(asilomar.value);
+      } else {
+        console.error('Failed to load Asilomar conditions:', asilomar.reason);
+        setAsilomarConditions(null);
+      }
+
+      // Handle Lovers Point conditions
+      if (loversPoint.status === 'fulfilled') {
+        setLoversPointConditions(loversPoint.value);
+      } else {
+        console.error('Failed to load Lovers Point conditions:', loversPoint.reason);
+        setLoversPointConditions(null);
+      }
+
     } catch (err) {
       console.error('Failed to load marine data:', err);
       setError('Failed to load marine conditions data');
@@ -36,7 +57,19 @@ function App() {
   }, []);
 
   useEffect(() => {
-    loadData();
+    // Add a timeout to prevent hanging
+    const timeoutId = setTimeout(() => {
+      if (isLoading) {
+        setError('Request timed out. Please try again.');
+        setIsLoading(false);
+      }
+    }, 10000); // 10 second timeout
+
+    loadData().finally(() => {
+      clearTimeout(timeoutId);
+    });
+
+    return () => clearTimeout(timeoutId);
   }, [loadData]);
 
   const getTideTypeColor = (type: string) => {
@@ -45,6 +78,7 @@ function App() {
       case 'low': return 'bg-cyan-500';
       case 'rising': return 'bg-green-500';
       case 'falling': return 'bg-orange-500';
+      case 'predicted': return 'bg-indigo-500';
       default: return 'bg-gray-500';
     }
   };
@@ -141,7 +175,7 @@ function App() {
                 </div>
 
                 {/* Tide Legend */}
-                <div className="flex justify-center gap-4 text-sm">
+                <div className="flex justify-center gap-4 text-sm flex-wrap">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 bg-blue-500 rounded"></div>
                     <span>High Tide</span>
@@ -157,6 +191,10 @@ function App() {
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 bg-orange-500 rounded"></div>
                     <span>Falling</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-indigo-500 rounded"></div>
+                    <span>Predicted</span>
                   </div>
                 </div>
 

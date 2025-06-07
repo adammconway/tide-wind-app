@@ -68,6 +68,30 @@ export type AppRouter = typeof appRouter;
 
 async function start() {
   const port = process.env['SERVER_PORT'] || 2022;
+  
+  // Seed initial data if none exists
+  try {
+    console.log('Checking for existing data...');
+    const { db } = await import('./db');
+    const { tideDataTable } = await import('./db/schema');
+    const { eq } = await import('drizzle-orm');
+    
+    const existingTides = await db.select()
+      .from(tideDataTable)
+      .where(eq(tideDataTable.location, 'Coyote Point'))
+      .execute();
+    
+    if (existingTides.length === 0) {
+      console.log('No existing tide data found, seeding sample data...');
+      await seedSampleData();
+      console.log('Sample data seeded successfully');
+    } else {
+      console.log(`Found ${existingTides.length} existing tide records`);
+    }
+  } catch (error) {
+    console.error('Error checking/seeding initial data:', error);
+  }
+
   const server = createHTTPServer({
     middleware: (req, res, next) => {
       cors()(req, res, next);

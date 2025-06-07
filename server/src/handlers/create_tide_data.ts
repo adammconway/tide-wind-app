@@ -21,7 +21,7 @@ export const createTideData = async (input: CreateTideDataInput): Promise<TideDa
     return {
       ...tideData,
       height: parseFloat(tideData.height), // Convert string back to number
-      type: tideData.type as 'high' | 'low' | 'rising' | 'falling' // Cast to proper enum type
+      type: tideData.type as 'high' | 'low' | 'rising' | 'falling' | 'predicted' // Cast to proper enum type
     };
   } catch (error) {
     console.error('Tide data creation failed:', error);

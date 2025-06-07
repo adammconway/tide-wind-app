@@ -7,7 +7,7 @@ export const tideDataSchema = z.object({
   location: z.string(),
   timestamp: z.coerce.date(),
   height: z.number(), // Tide height in feet
-  type: z.enum(['high', 'low', 'rising', 'falling']),
+  type: z.enum(['high', 'low', 'rising', 'falling', 'predicted']),
   created_at: z.coerce.date(),
   updated_at: z.coerce.date()
 });
@@ -33,7 +33,7 @@ export const createTideDataInputSchema = z.object({
   location: z.string(),
   timestamp: z.coerce.date(),
   height: z.number(),
-  type: z.enum(['high', 'low', 'rising', 'falling'])
+  type: z.enum(['high', 'low', 'rising', 'falling', 'predicted'])
 });
 
 export type CreateTideDataInput = z.infer<typeof createTideDataInputSchema>;

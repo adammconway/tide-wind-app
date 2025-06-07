@@ -32,7 +32,7 @@ describe('seedSampleData', () => {
     expect(firstTide.location).toEqual('Coyote Point');
     expect(firstTide.timestamp).toBeInstanceOf(Date);
     expect(parseFloat(firstTide.height)).toBeGreaterThan(0);
-    expect(['high', 'low', 'rising', 'falling']).toContain(firstTide.type);
+    expect(['high', 'low', 'rising', 'falling', 'predicted']).toContain(firstTide.type);
     expect(firstTide.created_at).toBeInstanceOf(Date);
     expect(firstTide.updated_at).toBeInstanceOf(Date);
   });
